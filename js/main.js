@@ -1,10 +1,12 @@
 import NhanVien from "../js/nhanvien.js";
 import DanhSachNhanVien from "../js/danhsachnhanvien.js";
+import Validation from "../js/validation.js";
 
 let dsNhanVien = new DanhSachNhanVien();
+const validation = new Validation();
 const KEY = 'DSNV';
 
-function getEleId(id) {
+export function getEleId(id) {
     return document.getElementById(id);
 }
 
@@ -18,6 +20,21 @@ const getValue = () => {
     let basicSalrary = getEleId('luongCB').value;
     let position = getEleId('chucvu').value;
     let num_of_wh = getEleId('gioLam').value;
+
+    //Khai báo biến flag
+    let isValid = true;
+    /**
+     * Xử lý kiểm tra (Validation)
+     */
+    //Kiểm tra account
+    isValid &= validation.checkEmpty(account, 'tbTKNV', '(*) Vui lòng nhập tài khoản') && validation.checkString(account, 'tbTKNV', '(*) Tài khoản không được chứa ký tự đặc biệt') && validation.checkCharLength(account, 'tbTKNV', '(*) Tài khoản phải từ 4-6 ký số', 4, 6) && validation.checkIdExisted(account, dsNhanVien.employees, 'tbTKNV', '(*) Tài khoản này đã tồn tại');
+    //Kiểm tra tên nhân viên
+    isValid &= validation.checkEmpty(fullName, 'tbTen', '(*) Vui lòng nhập tên nhân viên');
+
+    //Nếu isInvalid === fales thì dừng, không làm tiếp các lệnh sau
+    // if (isValid === false) return;
+    //Or:
+    if (!isValid) return;
 
     //Tạo đối tượng Nhân Viên từ lớp NhanVien
     const nhanVien = new NhanVien(account, fullName, email, password, workday, basicSalrary, position, num_of_wh);
@@ -72,6 +89,9 @@ const renderDSNhanVien = (employees) => {
 getEleId('btnThemNV').onclick = function () {
     // alert('OK nha');
     const nhanVien = getValue();
+
+    if (!nhanVien) return;
+
     dsNhanVien.themNhanVien(nhanVien);
     //Xuất/render nhân viên ra giao diện
     renderDSNhanVien(dsNhanVien.employees);
@@ -79,7 +99,7 @@ getEleId('btnThemNV').onclick = function () {
     //Lưu trữ danh sách nhân viên vào localStorage
     // localStorage.setItem(KEY, JSON.stringify(dsNhanVien.employees)); //Kiểu viết 1
     setLocalStorage(dsNhanVien.employees);//Kiểu viết 2
-    getEleId('btnDong').click(); //Đóng modal sau khi thêm nhân viên
+    // getEleId('btnDong').click(); //Đóng modal sau khi thêm nhân viên
 }
 
 function setLocalStorage(employees) {
