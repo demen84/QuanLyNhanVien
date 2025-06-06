@@ -16,25 +16,26 @@ class Validation {
     checkEmpty(value, idNoti, message) {
         // let isValid = true;
         if (value === '') {
-            document.getElementById(idNoti).innerHTML = message;
-            document.getElementById(idNoti).style.display = 'block';
+            getEleId(idNoti).innerHTML = message;
+            getEleId(idNoti).style.display = 'block';
             return false;
         }
-        document.getElementById(idNoti).innerHTML = '';
-        document.getElementById(idNoti).style.display = 'none';
+        getEleId(idNoti).innerHTML = '';
+        getEleId(idNoti).style.display = 'none';
         return true;
     }
 
     checkString(value, idNoti, message) {
-        const regex = "^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$"; // Regex cho phép chữ cái và khoảng trắng
+        const regex = "^[a-zA-Z_ÀÁÂÃÈÉÊẾÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶ" + "ẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợ" + "ụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]+$";
+        //const regex = ^[\p{L}\s]+$; // Regex cho phép chữ cái và khoảng trắng, sử dụng Unicode
         if (value.match(regex)) {
-            document.getElementById(idNoti).innerHTML = '';
-            document.getElementById(idNoti).style.display = 'none';
+            getEleId(idNoti).innerHTML = '';
+            getEleId(idNoti).style.display = 'none';
             return true;
         }
-        document.getElementById(idNoti).innerHTML = message;
-        document.getElementById(idNoti).style.display = 'block';
-        return true;
+        getEleId(idNoti).innerHTML = message;
+        getEleId(idNoti).style.display = 'block';
+        return false;
     }
 
     checkCharLength(value, idNoti, message, minLength, maxLength) {
@@ -60,17 +61,32 @@ class Validation {
         return false;
     }
 
-    checkIdExisted(value, arr, idNoti, message) {
-        // const exist = arr.some(item => item.account === value);
-        // if (exist) {
-        //     getEleId(idNoti).innerHTML = message;
-        //     getEleId(idNoti).style.display = 'block';
-        //     return false;
-        // }
-        // getEleId(idNoti).innerHTML = '';
-        // getEleId(idNoti).style.display = 'none';
-        // return true;
 
+    checkPassword(value, idNoti, message) {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,10}$/;
+        if (value.match(regex)) {
+            getEleId(idNoti).innerText = '';
+            getEleId(idNoti).style.display = 'none';
+            return true;
+        }
+        getEleId(idNoti).innerText = message;
+        getEleId(idNoti).style.display = 'block';
+        return false;
+    }
+
+    checkDateFormat(value, idNoti, message) {
+        const regex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/[0-9]{4}$/;
+        if (value.match(regex)) {
+            getEleId(idNoti).innerText = '';
+            getEleId(idNoti).style.display = 'none';
+            return true;
+        }
+        getEleId(idNoti).innerText = message;
+        getEleId(idNoti).style.display = 'block';
+        return false;
+    }
+
+    checkIdExisted(value, arr, idNoti, message) {
         let isExist = false;
         for (let i = 0; i < arr.length; i++) {
             const nhanVien = arr[i];
@@ -102,22 +118,41 @@ class Validation {
 
     checkAmount(amount, min, max, idNoti, message) {
         const value = parseFloat(amount);
-        if (isNaN(value) && (value < min || value > max)) {
+        if (!isNaN(value) && (value < min || value > max)) {
             // return { valid: false, error: 'Giá trị không hợp lệ. Vui lòng chỉ nhập số!' };
             getEleId(idNoti).innerHTML = message;
             getEleId(idNoti).style.display = 'block';
             return false;
         }
-        // if (value < min || value > max) {
-        //     // return { valid: false, error: message || 'Vui lòng nhập số tiền từ 1.000.000 -> 20.000.000' };
-        //     getEleId(idNoti).innerHTML = message;
-        //     getEleId(idNoti).style.display = 'block';
-        //     return false;
-        // }
         getEleId(idNoti).innerHTML = '';
         getEleId(idNoti).style.display = 'none';
         return true;
     }
+
+    checkNumber(value, idNoti, message) {
+        const regex = /^\d+$/;
+        if (value.match(regex)) {
+            getEleId(idNoti).innerText = '';
+            getEleId(idNoti).style.display = 'none';
+            return true;
+        }
+        getEleId(idNoti).innerText = message;
+        getEleId(idNoti).style.display = 'block';
+        return false;
+    }
+
+    // checkSoGioLam(soGioLam, min, max, idNoti, message) {
+    //     const value = parseFloat(soGioLam);
+
+    //     if (!isNaN(value) && (value < min || value > max)) {
+    //         getEleId(idNoti).innerHTML = message;
+    //         getEleId(idNoti).style.display = 'block';
+    //         return false;
+    //     }
+    //     getEleId(idNoti).innerHTML = '';
+    //     getEleId(idNoti).style.display = 'none';
+    //     return true;
+    // }
 }
 
 export default Validation;

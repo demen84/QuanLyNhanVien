@@ -11,7 +11,7 @@ export function getEleId(id) {
 }
 
 //Xử lý DOM tới các giá trị
-const getValue = () => {
+const getValue = (isAdd) => {
     let account = getEleId('tknv').value;
     let fullName = getEleId('name').value;
     let email = getEleId('email').value;
@@ -23,13 +23,63 @@ const getValue = () => {
 
     //Khai báo biến flag
     let isValid = true;
-    /**
-     * Xử lý kiểm tra (Validation)
+
+    /** Xử lý kiểm tra (Validation) tài khoản
+     * 1. Không được để trống
+     * 2. Phải từ 4->6 ký tự
+     * 3. Không được trùng với tài khoản đã nhập trước đó
      */
-    //Kiểm tra account
-    isValid &= validation.checkEmpty(account, 'tbTKNV', '(*) Vui lòng nhập tài khoản') && validation.checkString(account, 'tbTKNV', '(*) Tài khoản không được chứa ký tự đặc biệt') && validation.checkCharLength(account, 'tbTKNV', '(*) Tài khoản phải từ 4-6 ký số', 4, 6) && validation.checkIdExisted(account, dsNhanVien.employees, 'tbTKNV', '(*) Tài khoản này đã tồn tại');
-    //Kiểm tra tên nhân viên
-    isValid &= validation.checkEmpty(fullName, 'tbTen', '(*) Vui lòng nhập tên nhân viên');
+    if (isAdd) {
+        isValid &= validation.checkEmpty(account, 'tbTKNV', '(*) Vui lòng nhập tài khoản') && validation.checkCharLength(account, 'tbTKNV', '(*) Tài khoản phải từ 4->6 ký tự', 4, 6) && validation.checkIdExisted(account, dsNhanVien.employees, 'tbTKNV', '(*) Tài khoản này đã tồn tại');
+    }
+
+    /** Kiểm tra Tên người dùng
+     * 1. Chỉ được nhập chữ
+     * 2. Không được để trống
+     */
+    isValid &= validation.checkEmpty(fullName, 'tbTen', '(*) Vui lòng nhập tên nhân viên');// && validation.checkString(fullName, 'tbTen', '(*) Vui lòng chỉ nhập chữ');
+
+    /** Kiểm tra Email
+     * 1. Không được để trống
+     * 2. Nhập đúng định dạng email (ex: abc@xyz.com)
+     */
+    isValid &= validation.checkEmpty(email, 'tbEmail', '(*) Vui lòng nhập email') && validation.checkEmail(email, 'tbEmail', '(*) Vui lòng nhập đúng định dạng email. Vd: abc@xyz.com');
+
+    /** Kiểm tra Password
+     * 1. Không được để trống
+     * 2. Chứa ít nhất 1 ký tự số, 1 ký tự in HOA, 1 ký tự đặc biệt
+     * 3. Độ dài từ 6-10 ký tự tbMatKhau
+     */
+    isValid &= validation.checkEmpty(password, 'tbMatKhau', '(*) Vui lòng nhập mật khẩu') && validation.checkCharLength(password, 'tbMatKhau', '(*) Mật khẩu phải từ 6-10 ký tự', 6, 10) && validation.checkPassword(password, 'tbMatKhau', '(*) Mật khẩu phải có chữ thường, ít nhất 1 chữ HOA, ít nhất 1 ký tự đặc biệt.');
+
+
+    /** Kiểm tra Ngày làm
+     * 1. Không được để trống
+     * 2. Định dạng theo dạng: MM/dd/yyyy
+     */
+    isValid &= validation.checkEmpty(workday, 'tbNgay', '(*) Ngày làm không được để trống') && validation.checkDateFormat(workday, 'tbNgay', '(*) Vui lòng nhập đúng định dạng mm/dd/yyyy (vd: 06/28/2025)');
+
+
+    /** Kiểm tra tiền lương
+     * 1. Không được để trống
+     * 2. Chỉ được nhập số;
+     * 3. Giá trị tiền nằm trong khoảng 1.000.000 -> 20.000.000
+     */
+    isValid &= validation.checkEmpty(basicSalrary, 'tbLuongCB', '(*) Vui lòng nhập tiền lương') && validation.checkAmount(basicSalrary, 1000000, 20000000, 'tbLuongCB', '(*) Tiền lương phải nằm trong khoảng 1.000.000->20.000.000') && validation.checkNumber(basicSalrary, 'tbLuongCB', '(*) Vui lòng chỉ nhập số');
+
+
+    /** Kiểm tra Chức vụ
+     * 1. Chọn chức vụ hợp lệ: Gián đốc/Trưởng phòng/Nhân viên
+     */
+    isValid &= validation.checkSelectOption('chucvu', 'tbChucVu', '(*) Vui lòng chọn Chức vụ');
+
+
+    /** Kiểm tra số giờ làm việc
+     * 1. Không được để trống
+     * 2. Chỉ được nhập số;
+     * 3. Số giờ làm nằm trong khoảng 80 -> 200 giờ
+     */
+    isValid &= validation.checkAmount(num_of_wh, 80, 200, 'tbGiolam', '(*) Số giờ phải nằm trong khoảng 80->200 giờ') && validation.checkEmpty(num_of_wh, 'tbGiolam', '(*) Vui lòng nhập số giờ làm việc') && validation.checkNumber(num_of_wh, 'tbGiolam', '(*) Vui lòng chỉ nhập số');
 
     //Nếu isInvalid === fales thì dừng, không làm tiếp các lệnh sau
     // if (isValid === false) return;
@@ -88,7 +138,7 @@ const renderDSNhanVien = (employees) => {
 //Xử lý click vào nút Thêm nhân viên
 getEleId('btnThemNV').onclick = function () {
     // alert('OK nha');
-    const nhanVien = getValue();
+    const nhanVien = getValue(true);
 
     if (!nhanVien) return;
 
@@ -139,34 +189,8 @@ getEleId('btnThem').onclick = function () {
     getEleId('tknv').disabled = false;
     getEleId('tknv').focus(); //Đặt con trỏ vào ô tài khoản - chưa work
 
-    // //Xóa các giá trị trong form
-    // getEleId('tknv').value = '';
-    // getEleId('name').value = '';
-    // getEleId('password').value = '';
-    // getEleId('datepicker').value = '';
-    // getEleId('luongCB').value = '';
-    // getEleId('chucvu').value = 'Chọn chức vụ';
-    // getEleId('gioLam').value = '';
-    // //Xóa thông báo lỗi
-    // getEleId('tbTKNV').innerHTML = '';
-    // getEleId('tbTen').innerHTML = '';
-    // getEleId('tbEmail').innerHTML = '';
-    // getEleId('tbLuong').innerHTML = '';
-    // getEleId('tbChucVu').innerHTML = '';
-    // getEleId('tbGioLam').innerHTML = '';
-    // getEleId('tbXepLoai').innerHTML = '';
-    // getEleId('tbPassword').innerHTML = '';
-    // getEleId('tbNgay').innerHTML = '';
-    // //Ẩn thông báo lỗi
-    // getEleId('tbTKNV').style.display = 'none';
-    // getEleId('tbTen').style.display = 'none';
-    // getEleId('tbEmail').style.display = 'none';
-    // getEleId('tbLuong').style.display = 'none';
-    // getEleId('tbChucVu').style.display = 'none';
-    // getEleId('tbGioLam').style.display = 'none';
-    // getEleId('tbXepLoai').style.display = 'none';
-    // getEleId('tbPassword').style.display = 'none';
-    // getEleId('tbNgay').style.display = 'none';
+    //Gọi hàm resetForm để xóa các giá trị trong form
+    resetForm();
 
 }
 
@@ -209,7 +233,7 @@ function onEditEmployee(account) {
 
 //Xử lý sự kiện click vào nút Cập nhật
 getEleId('btnCapNhat').onclick = function () {
-    const nhanVien = getValue();
+    const nhanVien = getValue(false);
 
     dsNhanVien.capNhatNhanVien(nhanVien);
 
@@ -230,11 +254,6 @@ const resetForm = () => {
 window.onDeleteEmployee = onDeleteEmployee; //Để có thể gọi hàm này từ HTML
 window.onEditEmployee = onEditEmployee; //Để có thể gọi hàm này từ HTML
 
-// getEleId('btnTimNV').onclick = function () {
-//     let xeploai = getEleId('searchName').value;//.toLowerCase();
-//     dsNhanVien.locNhanVienTheoXepLoai(xeploai);
-//     renderDSNhanVien(dsNhanVien.employees);
-// }
 
 //Xử lý tìm kiếm nhân viên theo tên
 getEleId('searchName').addEventListener('keyup', () => {
@@ -264,6 +283,7 @@ getEleId('xepLoai').onchange = function () {
     renderDSNhanVien(arrFiltered);
 }
 
+/*
 //Validation account & password
 function validateAccount() {
     let account = getEleId("tknv").value;
@@ -309,9 +329,7 @@ function validateSoGioLam() {
     return true;
 }
 
-
-
 function validateForm() {
     return validateAccount() && validatePassword();
-}
+} */
 
